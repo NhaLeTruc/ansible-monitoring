@@ -16,7 +16,7 @@
       tags: always
 
 - name: deploy_monitors.yml | Perform pre-checks
-  hosts: all
+  hosts: prometheus:grafana
   become: true
   become_method: sudo
   gather_facts: true
@@ -182,18 +182,18 @@
 
     - role: hostname
 
-- name: deploy_monitors.yml | Deploy etcd cluster
+- name: deploy_monitors.yml | Deploy Prometheus
   ansible.builtin.import_playbook: deploy_prometheus.yml # Import/run another playbook
   when: always
   tags: prometheus
 
-- name: deploy_monitors.yml | Deploy Consul
+- name: deploy_monitors.yml | Deploy Grafana
   ansible.builtin.import_playbook: deploy_grafana.yml
   when: always
   tags: grafana
 
 - name: deploy_monitors.yml | Prometheus and Grafana Configuration
-  hosts: prometheus_grafana
+  hosts: prometheus:grafana
   become: true
   become_method: sudo
   gather_facts: true
@@ -253,7 +253,7 @@
     - role: copy
 
 - name: deploy_monitors.yml | Prometheus and Grafana Deployment
-  hosts: prometheus_grafana
+  hosts: prometheus:grafana
   become: true
   become_method: sudo
   gather_facts: true
