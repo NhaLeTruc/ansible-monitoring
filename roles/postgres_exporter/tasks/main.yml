@@ -1,79 +1,53 @@
 ---
-- name: Make sure handlers are flushed immediately
-  ansible.builtin.meta: flush_handlers
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+  tags:
+    - postgres_exporter_install
+    - postgres_exporter_configure
+    - postgres_exporter_run
 
-- name: Make sure the unzip/tar packages are present
-  ansible.builtin.package:
-    name:
-      - unzip
-      - tar
-    state: present
-  register: package_status
-  until: package_status is success
-  delay: 5
-  retries: 3
-  environment: "{{ proxy_env | default({}) }}"
-  tags: postgres_exporter, postgres_exporter_install
+- name: Install
+  ansible.builtin.include_role:
+    name: prometheus.prometheus._common
+    tasks_from: install.yml
+  vars:
+    _common_local_cache_path: "{{ postgres_exporter_local_cache_path }}"
+    _common_binaries: "{{ _postgres_exporter_binaries }}"
+    _common_binary_install_dir: "{{ postgres_exporter_binary_install_dir }}"
+    _common_binary_url: "{{ postgres_exporter_binary_url }}"
+    _common_checksums_url: "{{ postgres_exporter_checksums_url }}"
+    _common_system_group: "{{ postgres_exporter_system_group }}"
+    _common_system_user: "{{ postgres_exporter_system_user }}"
+    _common_config_dir: "{{ postgres_exporter_config_dir }}"
+    _common_binary_unarchive_opts: ['--strip-components=1']
+  tags:
+    - postgres_exporter_install
 
-- block: # install postgres_exporter package from tar
-    - name: Download "postgres_exporter" package
-      ansible.builtin.get_url:
-        url: "{{ item }}"
-        dest: /opt/postgres_exporter/
-        timeout: 60
-        validate_certs: false
-      loop:
-        - "{{ postgres_exporter_package_tar }}"
-      environment: "{{ proxy_env | default({}) }}"
+- name: SELinux
+  ansible.builtin.include_role:
+    name: prometheus.prometheus._common
+    tasks_from: selinux.yml
+  vars:
+    _common_selinux_port: "{{ postgres_exporter_web_listen_address | urlsplit('port') }}"
+  when: ansible_facts['selinux'].status == "enabled"
+  tags:
+    - postgres_exporter_configure
 
-    - name: Extract "postgres_exporter" into /
-      ansible.builtin.unarchive:
-        src: "/{{ postgres_exporter_package_tar | basename }}"
-        dest: /opt/postgres_exporter/
-        extra_opts:
-          - --no-same-owner
-        remote_src: true
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+  tags:
+    - postgres_exporter_configure
 
-    - name: Enable and Start postgres_exporter
-      ansible.builtin.command: >
-        cp /opt/postgres_exporter /usr/local/bin
-      retries: 10
-      delay: 10
-
-  when:
-    - installation_method == "tar"
-    - postgres_exporter_package_tar | length > 0
-    - not ansible_check_mode
-  tags: postgres_exporter, postgres_exporter_install
-
-- name: Generate conf file "/postgres_exporter.env"
-  ansible.builtin.template:
-    src: templates/postgres_exporter.env.j2
-    dest: /postgres_exporter.env
-  tags: postgres_exporter, postgres_exporter_conf
-
-- name: Generate conf file "/postgres_exporter.service"
-  ansible.builtin.template:
-    src: templates/postgres_exporter.service.j2
-    dest: /postgres_exporter.service
-  tags: postgres_exporter, postgres_exporter_conf
-
-- block:
-    - name: Enable and Start postgres_exporter
-      ansible.builtin.command: >
-        systemctl daemon-reload
-        systemctl enable postgres_exporter
-        systemctl start postgres_exporter
-      retries: 10
-      delay: 10
-  tags: postgres_exporter, postgres_exporter_conf
-
-- name: Wait for port 9090 to become open on the host
-  ansible.builtin.wait_for:
-    port: 9187
-    host: 127.0.0.1
+- name: Ensure PostgreSQL Exporter is enabled on boot
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: postgres_exporter
+    enabled: true
     state: started
-    timeout: 120
-    delay: 10
-  ignore_errors: false
-  tags: postgres_exporter, postgres_exporter_start
+  when:
+    - not ansible_check_mode
+  tags:
+    - postgres_exporter_run
