@@ -1,0 +1,13 @@
+[Unit]
+Description=Prometheus exporter for Postgresql
+Wants=network-online.target
+After=network-online.target
+[Service]
+User=postgres
+Group=postgres
+WorkingDirectory=/opt/postgres_exporter
+EnvironmentFile=/opt/postgres_exporter/postgres_exporter.env
+ExecStart=/usr/local/bin/postgres_exporter
+Restart=always
+[Install]
+WantedBy=multi-user.target

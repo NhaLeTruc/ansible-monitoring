@@ -1,0 +1,79 @@
+---
+- name: Make sure handlers are flushed immediately
+  ansible.builtin.meta: flush_handlers
+
+- name: Make sure the unzip/tar packages are present
+  ansible.builtin.package:
+    name:
+      - unzip
+      - tar
+    state: present
+  register: package_status
+  until: package_status is success
+  delay: 5
+  retries: 3
+  environment: "{{ proxy_env | default({}) }}"
+  tags: postgres_exporter, postgres_exporter_install
+
+- block: # install postgres_exporter package from tar
+    - name: Download "postgres_exporter" package
+      ansible.builtin.get_url:
+        url: "{{ item }}"
+        dest: /opt/postgres_exporter/
+        timeout: 60
+        validate_certs: false
+      loop:
+        - "{{ postgres_exporter_package_tar }}"
+      environment: "{{ proxy_env | default({}) }}"
+
+    - name: Extract "postgres_exporter" into /
+      ansible.builtin.unarchive:
+        src: "/{{ postgres_exporter_package_tar | basename }}"
+        dest: /opt/postgres_exporter/
+        extra_opts:
+          - --no-same-owner
+        remote_src: true
+
+    - name: Enable and Start postgres_exporter
+      ansible.builtin.command: >
+        cp /opt/postgres_exporter /usr/local/bin
+      retries: 10
+      delay: 10
+
+  when:
+    - installation_method == "tar"
+    - postgres_exporter_package_tar | length > 0
+    - not ansible_check_mode
+  tags: postgres_exporter, postgres_exporter_install
+
+- name: Generate conf file "/postgres_exporter.env"
+  ansible.builtin.template:
+    src: templates/postgres_exporter.env.j2
+    dest: /postgres_exporter.env
+  tags: postgres_exporter, postgres_exporter_conf
+
+- name: Generate conf file "/postgres_exporter.service"
+  ansible.builtin.template:
+    src: templates/postgres_exporter.service.j2
+    dest: /postgres_exporter.service
+  tags: postgres_exporter, postgres_exporter_conf
+
+- block:
+    - name: Enable and Start postgres_exporter
+      ansible.builtin.command: >
+        systemctl daemon-reload
+        systemctl enable postgres_exporter
+        systemctl start postgres_exporter
+      retries: 10
+      delay: 10
+  tags: postgres_exporter, postgres_exporter_conf
+
+- name: Wait for port 9090 to become open on the host
+  ansible.builtin.wait_for:
+    port: 9187
+    host: 127.0.0.1
+    state: started
+    timeout: 120
+    delay: 10
+  ignore_errors: false
+  tags: postgres_exporter, postgres_exporter_start
