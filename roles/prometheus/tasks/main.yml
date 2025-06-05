@@ -53,7 +53,7 @@
   tags: prometheus, prometheus_conf
 
 - block:
-    - name: Wait until the etcd cluster is healthy
+    - name: Enable and Start Prometheus
       ansible.builtin.command: >
         systemctl daemon-reload
         systemctl enable prometheus
@@ -71,4 +71,3 @@
     delay: 10
   ignore_errors: false
   tags: prometheus, prometheus_start
-  
