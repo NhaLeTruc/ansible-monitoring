@@ -1,73 +1,58 @@
 ---
-- name: Make sure handlers are flushed immediately
-  ansible.builtin.meta: flush_handlers
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+  tags:
+    - prometheus_configure
+    - prometheus_install
+    - prometheus_run
 
-- name: Make sure the unzip/tar packages are present
-  ansible.builtin.package:
-    name:
-      - unzip
-      - tar
-    state: present
-  register: package_status
-  until: package_status is success
-  delay: 5
-  retries: 3
-  environment: "{{ proxy_env | default({}) }}"
-  tags: prometheus, prometheus_install
+- name: Install
+  ansible.builtin.include_role:
+    name: prometheus.prometheus._common
+    tasks_from: install.yml
+  vars:
+    _common_local_cache_path: "{{ prometheus_local_cache_path }}"
+    _common_binaries: "{{ _prometheus_binaries }}"
+    _common_binary_install_dir: "{{ prometheus_binary_install_dir }}"
+    _common_binary_url: "{{ prometheus_binary_url }}"
+    _common_checksums_url: "{{ prometheus_checksums_url }}"
+    _common_system_group: "{{ prometheus_system_group }}"
+    _common_system_user: "{{ prometheus_system_user }}"
+    _common_config_dir: "{{ prometheus_config_dir }}"
+    _common_binary_unarchive_opts: ['--strip-components=1']
+  tags:
+    - prometheus_install
 
-- block: # install prometheus package from tar
-    - name: Download "prometheus" package
-      ansible.builtin.get_url:
-        url: "{{ item }}"
-        dest: /
-        timeout: 60
-        validate_certs: false
-      loop:
-        - "{{ prometheus_package_tar }}"
-      environment: "{{ proxy_env | default({}) }}"
+- name: SELinux
+  ansible.builtin.include_role:
+    name: prometheus.prometheus._common
+    tasks_from: selinux.yml
+  vars:
+    _common_selinux_port: "{{ prometheus_web_listen_address | urlsplit('port') }}"
+  when: ansible_facts['selinux'].status == "enabled"
+  tags:
+    - prometheus_configure
 
-    - name: Extract "prometheus" into /
-      ansible.builtin.unarchive:
-        src: "/{{ prometheus_package_tar | basename }}"
-        dest: /
-        extra_opts:
-          - --no-same-owner
-        remote_src: true
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+  tags:
+    - prometheus_configure
 
-  when:
-    - installation_method == "tar"
-    - prometheus_package_tar | length > 0
-    - not ansible_check_mode
-  tags: prometheus, prometheus_install
-
-- name: Generate conf file "/prometheus.yml"
-  ansible.builtin.template:
-    src: templates/prometheus.yml.j2
-    dest: /prometheus.yml
-  tags: prometheus, prometheus_conf
-
-- name: Generate conf file "/prometheus.service"
-  ansible.builtin.template:
-    src: templates/prometheus.service.j2
-    dest: /prometheus.service
-  tags: prometheus, prometheus_conf
-
-- block:
-    - name: Enable and Start Prometheus
-      ansible.builtin.command: >
-        systemctl daemon-reload
-        systemctl enable prometheus
-        systemctl start prometheus
-      retries: 10
-      delay: 10
-  tags: prometheus, prometheus_conf
-
-- name: Wait for port 9090 to become open on the host
-  ansible.builtin.wait_for:
-    port: 9090
-    host: 127.0.0.1
+- name: Ensure prometheus service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: prometheus
     state: started
-    timeout: 120
-    delay: 10
-  ignore_errors: false
-  tags: prometheus, prometheus_start
+    enabled: true
+  tags:
+    - prometheus_run
+
+- name: Make sure prometheus service is running
+  ansible.builtin.service_facts: {}
+  register: __service_status
+  until: "__service_status.ansible_facts.services['prometheus.service'].state == 'running'"
+  retries: 10
+  delay: 5
