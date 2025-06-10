@@ -153,14 +153,6 @@
 
   roles:
     - role: hostname
-    
-    - role: tls_certificate/generate
-      vars:
-        tls_group_name: "postgres_cluster"
-        tls_cert_regenerate: "{{ patroni_tls_cert_regenerate | default(false) }}" # Do not generate new certificates if they already exist.
-      when: tls_cert_generate | bool
-
-    
     - role: resolv_conf
     - role: timezone
 
