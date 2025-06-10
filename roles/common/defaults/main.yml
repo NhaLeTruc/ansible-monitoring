@@ -1,0 +1,10 @@
+---
+# TLS certificate
+tls_cert_generate: "{{ tls_enable | default(true) }}" # or 'false' if you do not want to generate a self-signed certificate.
+tls_cert_valid_days: 3650
+tls_dir: "/etc/tls"
+tls_cert: "server.crt"
+tls_privatekey: "server.key"
+tls_ca_cert: "ca.crt"
+tls_ca_key: "ca.key"
+
