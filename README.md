@@ -165,3 +165,12 @@ You can also verify that Prometheus is serving metrics about itself by navigatin
 
 1. [setup-grafana](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/)
 2. [download-prometheus](https://prometheus.io/download/)
+
+---
+
+## Ansible install
+
+```bash
+ansible-galaxy collection install prometheus.prometheus
+ansible-playbook deploy_prometheus.yml
+```
