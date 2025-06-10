@@ -1,0 +1,101 @@
+---
+# DNS servers (/etc/resolv.conf)
+nameservers: []
+#  - "8.8.8.8"  # example (Google Public DNS)
+#  - "9.9.9.9"  # (Quad9 Public DNS)
+
+# timezone: ""
+timezone: "Etc/UTC"
+# timezone: "America/New_York"
+# timezone: "Europe/Moscow"
+# timezone: "Europe/Berlin"
+
+# Generate locale
+# (except RHEL>=8,use glibc-langpack)
+locale_gen:
+  - { language_country: "en_US", encoding: "UTF-8" }
+#  - { language_country: "ru_RU", encoding: "UTF-8" }
+#  - { language_country: "de_DE", encoding: "UTF-8" }
+#  - { language_country: "", encoding: "" }
+
+# Set system locale (LANG,LC_ALL)
+locale: "en_US.utf-8"
+
+# Configure swap space (if not already exists)
+swap_file_create: true # or 'false'
+swap_file_path: /swapfile
+swap_file_size_mb: "4096" # change this value for your system
+
+# SSH Keys (optional)
+enable_ssh_key_based_authentication: false # or 'true' for configure SSH Key-Based Authentication
+ssh_key_user: "postgres"
+ssh_key_state: "present"
+ssh_known_hosts: "{{ groups['postgres_cluster'] }}"
+
+# List of public SSH keys. These keys will be added to the database server's  ~/.ssh/authorized_keys  file.
+ssh_public_keys: []
+
+# sudo
+sudo_users:
+  - name: "postgres"
+    nopasswd: "yes" # or "no" to require a password
+    commands: "ALL"
+#  - name: "joe" # other user (example)
+#    nopasswd: "no"
+#    commands: "/usr/bin/find, /usr/bin/less, /usr/bin/tail, /bin/kill"
+
+# System cron jobs
+cron_jobs: []
+#  - name: "Example Job one"
+#    user: "postgres"
+#    file: /etc/cron.d/example_job_one
+#    minute: "00"
+#    hour: "1"
+#    day: "*"
+#    month: "*"
+#    weekday: "*"
+#    job: "echo 'example job one command'"
+#  - name: "Example Job two"
+#    user: "postgres"
+#    file: /etc/cron.d/example_job_two
+#    minute: "00"
+#    hour: "2"
+#    day: "*"
+#    month: "*"
+#    weekday: "*"
+#    job: "echo 'example job two command'"
+
+# (optional) Execute custom commands or scripts
+# This can be a direct command, a bash script content, or a path to a script on the host
+pre_deploy_command: "" # Command or script to be executed before the Postgres cluster deployment
+pre_deploy_command_timeout: 3600 # Timeout in seconds
+pre_deploy_command_hosts: "postgres_cluster" # host groups where the pre_deploy_command should be executed
+pre_deploy_command_print: true # Print the command in the ansible log
+pre_deploy_command_print_result: true # Print the result of the command execution to the ansible log
+pre_deploy_command_log: "/var/tmp/pre_deploy_command.log"
+
+post_deploy_command: "" # Command or script to be executed after the Postgres cluster deployment
+post_deploy_command_timeout: 3600 # Timeout in seconds
+post_deploy_command_hosts: "postgres_cluster" # host groups where the post_deploy_command should be executed
+post_deploy_command_print: true # Print the command in the ansible log
+post_deploy_command_print_result: true # Print the result of the command execution to the ansible log
+post_deploy_command_log: "/var/tmp/post_deploy_command.log"
+
+# Supported Linux versions
+os_valid_distributions:
+  - RedHat
+  - CentOS
+  - Rocky
+  - OracleLinux
+  - Ubuntu
+  - Debian
+  - AlmaLinux
+
+os_minimum_versions:
+  RedHat: 8
+  CentOS: 8
+  Rocky: 8.4
+  AlmaLinux: 8.3
+  OracleLinux: 8
+  Ubuntu: 22.04
+  Debian: 11

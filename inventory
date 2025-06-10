@@ -1,0 +1,11 @@
+[prometheus]
+192.168.1.15
+
+[grafana]
+192.168.1.15
+
+[postgres_exporter]
+192.168.1.15
+
+[postgres_target]
+192.168.1.11

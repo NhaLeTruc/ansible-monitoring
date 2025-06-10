@@ -1,0 +1,43 @@
+---
+# yamllint disable rule:line-length
+
+# Packages
+system_packages:
+  - python3
+  - python3-dev
+  - python3-psycopg2
+  - python3-setuptools
+  - python3-pip
+  - curl
+  - less
+  - sudo
+  - vim
+  - gcc
+  - jq
+  - iptables
+  - acl
+  - dnsutils
+  - moreutils
+  - unzip
+  - tar
+  - zstd
+
+install_perf: false # or 'true' to install "perf" (Linux profiling with performance counters) and "FlameGraph".
+
+installation_method: "repo" # "repo" (default) or "file"
+
+# if installation_method: "file" and patroni_installation_method: "pip"
+pip_package_file: "pip-24.2.tar.gz" # https://pypi.org/project/pip/#files
+
+# ------------------------------------------------------------------------------------------------- #
+# (optional) Specify additional deb packages if required (for any installation_method)
+# this packages will be installed before all other packages.
+packages_from_file: []
+#  - "my-package-name_1_amd64.deb"
+#  - "my-package-name_2_amd64.deb"
+#  - ""
+
+# ----------------------------------------------------------------------------------------------------------------------------------
+# Attention! If you want to use the installation method "file".
+# You need to independently determine all the necessary the dependencies of deb packages for your version of the Linux distribution.
+# ----------------------------------------------------------------------------------------------------------------------------------
