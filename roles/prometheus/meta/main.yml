@@ -1,4 +1,6 @@
 ---
+# The argument_spec provided to AnsibleModule defines the supported arguments for a module, as well as their type, defaults and more.
+# In this case it provides this role dependencies for Ansible Galaxy listing info.
 galaxy_info:
   author: "Prometheus Community"
   description: "Prometheus monitoring system configuration and management"

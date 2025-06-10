@@ -1,5 +1,7 @@
 ---
 # yamllint disable rule:line-length
+# The argument_spec provided to AnsibleModule defines the supported arguments for a module, as well as their type, defaults and more.
+# In this case it provides readme metadata for defaults/main.yml variables.
 argument_specs:
   main:
     short_description: "Installs and configures prometheus"
@@ -25,6 +27,7 @@ argument_specs:
       prometheus_db_dir:
         description: "Path to directory with prometheus database"
         default: "/var/lib/prometheus"
+      # Need inputs
       prometheus_read_only_dirs:
         description: "Additional paths that Prometheus is allowed to read (useful for SSL certs outside of the config directory)"
         type: "list"
@@ -37,9 +40,11 @@ argument_specs:
       prometheus_web_listen_address:
         description: "Address on which prometheus will be listening"
         default: "0.0.0.0:9090"
+      # Need inputs
       prometheus_web_config:
         description: "A Prometheus L(web config yaml,https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md) for configuring TLS and auth."
         type: "dict"
+      # Need inputs
       prometheus_web_external_url:
         description: "External address on which prometheus is available. Useful when behind reverse proxy. Ex. `http://example.org/prometheus`"
       prometheus_metrics_path:
@@ -61,17 +66,20 @@ argument_specs:
           - "This feature is available starting from Prometheus v2.32.0."
         type: bool
         default: false
+      # Need inputs
       prometheus_config_flags_extra:
         description:
           - "Additional configuration flags passed to prometheus binary at startup"
           - "Example: prometheus_config_flags_extra: { alertmanager.timeout: 10s }"
         type: "dict"
+      # Need inputs
       prometheus_alertmanager_config:
         description:
           - "Configuration responsible for pointing where alertmanagers are. This should be specified as list in yaml format."
           - "It is compatible with the official L(alertmanager_config,https://prometheus.io/docs/prometheus/latest/configuration/configuration/#alertmanager_config)"
         type: "list"
         elements: "str"
+      # Need inputs
       prometheus_alert_relabel_configs:
         description:
           - "Alert relabeling rules. This should be specified as list in yaml format."
@@ -86,11 +94,13 @@ argument_specs:
           scrape_interval: "60s"
           scrape_timeout: "15s"
           evaluation_interval: "15s"
+      # Need inputs
       prometheus_remote_write:
         description:
           - "Remote write. Compatible with the L(official configuration,https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write)"
         type: "list"
         elements: "str"
+      # Need inputs
       prometheus_remote_read:
         description:
           - "Remote read. It is compatible with the L(official configuration,https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read)"
@@ -101,6 +111,7 @@ argument_specs:
         type: "dict"
         default:
           environment: "{{ ansible_fqdn | default(ansible_host) | default(inventory_hostname) }}"
+      # Need inputs
       prometheus_targets:
         description:
           - "Targets which will be scraped."
@@ -123,6 +134,7 @@ argument_specs:
       prometheus_config_file:
         description: "Variable used to provide custom prometheus configuration file in form of ansible template"
         default: "prometheus.yml.j2"
+      # Need inputs
       prometheus_alert_rules:
         description:
           - "Full list of alerting rules which will be copied to C({{ prometheus_config_dir }}/rules/ansible_managed.yml)."
