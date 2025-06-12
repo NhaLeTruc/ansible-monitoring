@@ -1,5 +1,4 @@
 *.tar.gz
 __pycache__/
 
-.pwd
-.enc
+*.pwd
