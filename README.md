@@ -172,5 +172,5 @@ You can also verify that Prometheus is serving metrics about itself by navigatin
 
 ```bash
 ansible-galaxy collection install prometheus.prometheus
-ansible-playbook deploy_monitors.yml
+ansible-playbook -e @secrets.enc deploy_monitors.yml
 ```

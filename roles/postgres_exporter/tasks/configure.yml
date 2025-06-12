@@ -21,8 +21,8 @@
     dest: "{{ postgres_exporter_config_dir }}/{{ postgres_exporter_config_file }}"
     owner: root
     group: '{{ postgres_exporter_system_group }}'
-    mode: '0640'
-  no_log: "{{ false if (lookup('env', 'CI')) or (lookup('env', 'MOLECULE_PROVISIONER_NAME')) else true }}"
+    mode: 0640
+  no_log: "false"
   notify: restart postgres_exporter
   become: true
   tags:
@@ -44,7 +44,7 @@
         content: "{{ postgres_exporter_uri }}"
         owner: root
         group: '{{ postgres_exporter_system_group }}'
-        mode: '0640'
+        mode: 0640
       notify: restart postgres_exporter
 
     - name: Creating file postgres_exporter_user
@@ -53,7 +53,7 @@
         content: "{{ postgres_exporter_username }}"
         owner: root
         group: '{{ postgres_exporter_system_group }}'
-        mode: '0640'
+        mode: 0640
       notify: restart postgres_exporter
 
     - name: Creating file postgres_exporter_pass
@@ -62,5 +62,5 @@
         content: "{{ postgres_exporter_password }}"
         owner: root
         group: '{{ postgres_exporter_system_group }}'
-        mode: '0640'
+        mode: 0640
       notify: restart postgres_exporter
