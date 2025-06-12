@@ -180,6 +180,30 @@
   roles:
     - role: prometheus
 
+- name: deploy_prometheus.yml | Deploy Prometheus
+  hosts: postgres_exporter
+  become: true
+  become_method: sudo
+  gather_facts: true
+  any_errors_fatal: true
+  environment: "{{ proxy_env | default({}) }}"
+
+  pre_tasks:
+    - name: Include main variables
+      ansible.builtin.include_vars: "roles/_common/defaults/main.yml"
+      tags: always
+
+    - name: Include system variables
+      ansible.builtin.include_vars: "roles/_common/defaults/system.yml"
+      tags: always
+
+    - name: Include OS-specific variables
+      ansible.builtin.include_vars: "roles/_common/defaults/{{ ansible_os_family }}.yml"
+      tags: always
+
+  roles:
+    - role: postgres_exporter
+
 # - name: deploy_prometheus.yml | Deploy Grafana
 #   hosts: grafana
 #   become: true

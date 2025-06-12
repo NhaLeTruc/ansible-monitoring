@@ -9,10 +9,12 @@ postgres_exporter_web_telemetry_path: "/metrics"
 
 postgres_exporter_config_file: "postgres_exporter.yml"
 
-postgres_exporter_name: "postgresql:///postgres?host=/var/run/postgresql"
+# Either postgres_exporter_name or postgres_exporter_uri not both.
+# postgres_exporter_name: "postgresql:///postgres?host=/var/run/postgresql"
+postgres_exporter_name: "{{ pg_name }}"
 postgres_exporter_uri: ""
-postgres_exporter_username: ""
-postgres_exporter_password: ""
+postgres_exporter_username: "{{ pg_username }}"
+postgres_exporter_password: "{{ pg_password }}"
 
 postgres_exporter_tls_server_config: {}
 
