@@ -22,7 +22,7 @@
     owner: root
     group: '{{ postgres_exporter_system_group }}'
     mode: 0640
-  no_log: "false"
+  no_log: "{{ false if (lookup('env', 'CI')) or (lookup('env', 'MOLECULE_PROVISIONER_NAME')) else true }}"
   notify: restart postgres_exporter
   become: true
   tags:
