@@ -180,7 +180,7 @@ grafana_alert_notifications: []
 grafana_alert_resources: {}
 
 # Datasources to configure
-grafana_datasources: []
+# grafana_datasources: []
 #  - name: "Prometheus"
 #    type: "prometheus"
 #    access: "proxy"
@@ -193,6 +193,22 @@ grafana_datasources: []
 #      tlsAuth: false
 #      tlsAuthWithCACert: false
 #      tlsSkipVerify: true
+grafana_datasources:
+ - name: "Prometheus"
+   type: "prometheus"
+   access: "proxy"
+   url: "http://localhost:9090"
+   jsonData:
+    httpMethod: POST
+    manageAlerts: true
+    prometheusType: Prometheus
+    prometheusVersion: 3.4.0
+    cacheLevel: 'High'
+    disableRecordingRules: false
+    incrementalQueryOverlapWindow: 10m
+    tlsAuth: false
+    tlsAuthWithCACert: false
+    tlsSkipVerify: true
 
 # API keys to configure
 grafana_api_keys: []
