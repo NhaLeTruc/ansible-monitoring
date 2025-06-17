@@ -1,7 +1,7 @@
 ---
 - name: Configure
   ansible.builtin.include_role:
-    name: prometheus.prometheus.common
+    name: common
     tasks_from: configure.yml
   vars:
     common_system_user: "{{ postgres_exporter_system_user }}"

@@ -9,7 +9,7 @@
 
 - name: Install
   ansible.builtin.include_role:
-    name: prometheus.prometheus.common
+    name: common
     tasks_from: install.yml
   vars:
     common_local_cache_path: "{{ prometheus_local_cache_path }}"
@@ -26,7 +26,7 @@
 
 - name: SELinux
   ansible.builtin.include_role:
-    name: prometheus.prometheus.common
+    name: common
     tasks_from: selinux.yml
   vars:
     common_selinux_port: "{{ prometheus_web_listen_address | urlsplit('port') }}"

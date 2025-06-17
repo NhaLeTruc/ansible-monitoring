@@ -1,7 +1,7 @@
 ---
 - name: Common preflight
   ansible.builtin.include_role:
-    name: prometheus.prometheus.common
+    name: common
     tasks_from: preflight.yml
   vars:
     common_web_listen_address: "{{ prometheus_web_listen_address }}"
