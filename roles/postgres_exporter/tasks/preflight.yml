@@ -1,10 +1,10 @@
 ---
 - name: Common preflight
   ansible.builtin.include_role:
-    name: prometheus.prometheus._common
+    name: prometheus.prometheus.common
     tasks_from: preflight.yml
   vars:
-    _common_web_listen_address: "{{ postgres_exporter_web_listen_address }}"
+    common_web_listen_address: "{{ postgres_exporter_web_listen_address }}"
 
 - name: Assert that used version supports listen address type
   ansible.builtin.assert:

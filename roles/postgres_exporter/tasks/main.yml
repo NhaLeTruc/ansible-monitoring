@@ -9,27 +9,27 @@
 
 - name: Install
   ansible.builtin.include_role:
-    name: prometheus.prometheus._common
+    name: prometheus.prometheus.common
     tasks_from: install.yml
   vars:
-    _common_local_cache_path: "{{ postgres_exporter_local_cache_path }}"
-    _common_binaries: "{{ _postgres_exporter_binaries }}"
-    _common_binary_install_dir: "{{ postgres_exporter_binary_install_dir }}"
-    _common_binary_url: "{{ postgres_exporter_binary_url }}"
-    _common_checksums_url: "{{ postgres_exporter_checksums_url }}"
-    _common_system_group: "{{ postgres_exporter_system_group }}"
-    _common_system_user: "{{ postgres_exporter_system_user }}"
-    _common_config_dir: "{{ postgres_exporter_config_dir }}"
-    _common_binary_unarchive_opts: ['--strip-components=1']
+    common_local_cache_path: "{{ postgres_exporter_local_cache_path }}"
+    common_binaries: "{{ _postgres_exporter_binaries }}"
+    common_binary_install_dir: "{{ postgres_exporter_binary_install_dir }}"
+    common_binary_url: "{{ postgres_exporter_binary_url }}"
+    common_checksums_url: "{{ postgres_exporter_checksums_url }}"
+    common_system_group: "{{ postgres_exporter_system_group }}"
+    common_system_user: "{{ postgres_exporter_system_user }}"
+    common_config_dir: "{{ postgres_exporter_config_dir }}"
+    common_binary_unarchive_opts: ['--strip-components=1']
   tags:
     - postgres_exporter_install
 
 - name: SELinux
   ansible.builtin.include_role:
-    name: prometheus.prometheus._common
+    name: prometheus.prometheus.common
     tasks_from: selinux.yml
   vars:
-    _common_selinux_port: "{{ postgres_exporter_web_listen_address | urlsplit('port') }}"
+    common_selinux_port: "{{ postgres_exporter_web_listen_address | urlsplit('port') }}"
   when: ansible_facts['selinux'].status == "enabled"
   tags:
     - postgres_exporter_configure
