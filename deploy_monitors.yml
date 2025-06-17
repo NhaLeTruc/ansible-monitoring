@@ -180,7 +180,7 @@
   roles:
     - role: prometheus
 
-- name: deploy_prometheus.yml | Deploy Prometheus
+- name: deploy_prometheus.yml | Deploy Postgres Exporter
   hosts: postgres_exporter
   become: true
   become_method: sudo
